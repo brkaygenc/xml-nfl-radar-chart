@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://nfl.stats.soap/player"
+           xmlns:nfl="http://nfl.stats.soap/player"
+           elementFormDefault="qualified">
+
+    <xs:element name="PlayerStats">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="player" type="nfl:PlayerType"/>
+                <xs:element name="stats" type="nfl:StatsType"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="PlayerType">
+        <xs:sequence>
+            <xs:element name="id" type="xs:integer"/>
+            <xs:element name="name" type="xs:string"/>
+            <xs:element name="team" type="xs:string"/>
+            <xs:element name="position" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="StatsType">
+        <xs:sequence>
+            <xs:element name="passing_yards" type="xs:integer"/>
+            <xs:element name="rushing_yards" type="xs:integer"/>
+            <xs:element name="touchdowns" type="xs:integer"/>
+            <xs:element name="interceptions" type="xs:integer"/>
+            <xs:element name="completion_percentage" type="xs:decimal"/>
+            <xs:element name="qb_rating" type="xs:decimal"/>
+        </xs:sequence>
+        <xs:attribute name="season" type="xs:integer"/>
+    </xs:complexType>
+
+</xs:schema> 
