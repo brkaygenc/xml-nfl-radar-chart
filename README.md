@@ -1,41 +1,34 @@
-# NFL Stats XML Web Service
+# NFL Stats Radar Chart
 
-A SOAP/XML web service that provides NFL player statistics and generates radar charts for player comparisons.
+A web application that visualizes NFL player statistics using interactive radar charts. Compare up to 5 players in the same position to analyze their performance across different metrics.
 
-## Project Overview
-- SOAP/XML web service for NFL player statistics
-- Radar chart visualization for player comparisons
-- Modern web UI for data interaction
-- Integration with existing NFL stats database
+## Features
 
-## Project Structure
-```
-nfl-stats-xml/
-├── src/
-│   ├── soap_service/      # SOAP service implementation
-│   ├── schemas/           # XML schemas and WSDL definitions
-│   ├── web_ui/           # Frontend application
-│   └── database/         # Database connection (read-only)
-├── tests/                # Unit and integration tests
-└── docs/                # API documentation
-```
+- Search players by name and position
+- Compare up to 5 players simultaneously
+- Interactive radar chart visualization
+- Position-specific statistics
+- Modern, responsive UI
+- Real-time updates
 
-## Technical Stack
-- Backend:
-  - Python with spyne for SOAP service
-  - lxml for XML processing
-  - xmlschema for validation
-  - PostgreSQL (read-only connection)
-- Frontend:
-  - React for web interface
-  - D3.js for radar charts
-  - XML/XSLT for data transformation
+## Live Demo
 
-## Setup
-1. Create a virtual environment:
+The application is deployed on Heroku:
+[NFL Stats Radar Chart](https://nfl-stats-radar-charts-7697747f5467.herokuapp.com/)
+
+## Tech Stack
+
+- Backend: FastAPI
+- Frontend: HTML, CSS, JavaScript (D3.js)
+- Database: PostgreSQL
+- Deployment: Heroku
+
+## Local Development
+
+1. Clone the repository:
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+git clone https://github.com/brkaygenc/xml-nfl-radar-chart.git
+cd xml-nfl-radar-chart
 ```
 
 2. Install dependencies:
@@ -43,16 +36,14 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-3. Configure environment variables:
+3. Run the application:
 ```bash
-cp .env.example .env
-# Edit .env with your database credentials
+cd src
+python -m uvicorn soap_service.main:app --reload
 ```
 
-## Development
-- Run tests: `pytest`
-- Start development server: `python src/soap_service/main.py`
-- Access WSDL at: `http://localhost:8000/?wsdl`
+4. Open http://localhost:8000 in your browser
 
 ## License
-MIT 
+
+MIT License 
