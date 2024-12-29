@@ -755,27 +755,16 @@
                 const labelX = labelDistance * Math.cos(cornerAngle);
                 const labelY = labelDistance * Math.sin(cornerAngle);
 
-                // Add background for better readability
-                const padding = 4;
-                const bgWidth = player.playername.length * 7 + padding * 2;
-                const bgHeight = 20;
-
-                svg.append('rect')
-                    .attr('x', labelX - (bgWidth/2))
-                    .attr('y', labelY - (bgHeight/2))
-                    .attr('width', bgWidth)
-                    .attr('height', bgHeight)
-                    .attr('fill', 'rgba(0, 0, 0, 0.7)')
-                    .attr('rx', 4);
-
+                // Add text with enhanced visibility
                 svg.append('text')
                     .attr('x', labelX)
                     .attr('y', labelY)
                     .attr('text-anchor', 'middle')
                     .attr('dominant-baseline', 'middle')
                     .attr('fill', color.border)
-                    .attr('font-size', '0.9rem')
-                    .attr('font-weight', '500')
+                    .attr('font-size', '1rem')
+                    .attr('font-weight', '600')
+                    .attr('text-shadow', '2px 2px 4px rgba(0, 0, 0, 0.5)')
                     .text(player.playername);
             });
 
