@@ -1,6 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import os
 from pydantic import BaseModel
 from typing import List, Optional
 import json
@@ -17,12 +20,23 @@ app = FastAPI(title="NFL Stats Service")
 # Enable CORS with specific configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8080"],  # Allow requests from web UI
+    allow_origins=["*"],  # Allow all origins in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"]
 )
+
+# Get the absolute path to the web_ui directory
+web_ui_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "web_ui")
+
+# Mount the static files directory
+app.mount("/static", StaticFiles(directory=web_ui_dir), name="static")
+
+@app.get("/")
+async def root():
+    """Serve the main index.html file"""
+    return FileResponse(os.path.join(web_ui_dir, "index.html"))
 
 @app.get("/api/teams")
 async def list_teams():
