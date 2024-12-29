@@ -13,10 +13,10 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #1a1a1a;
+            background-color: #111111;
             color: #ffffff;
             line-height: 1.4;
-            padding: 1rem;
+            padding: 2rem;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
@@ -29,191 +29,179 @@
 
         h1 {
             text-align: center;
-            color: #fff;
-            margin-bottom: 2rem;
-            font-size: 1.75rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 3rem;
+            font-size: 1.5rem;
+            font-weight: 500;
+            letter-spacing: 1px;
             text-transform: uppercase;
         }
 
         .search-container {
             display: flex;
-            gap: 0.75rem;
-            margin: 0 auto 2rem;
+            gap: 0.5rem;
+            margin: 0 auto 3rem;
             align-items: center;
-            max-width: 800px;
+            max-width: 600px;
             justify-content: center;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 1.25rem;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            position: relative;
         }
 
         input {
             flex-grow: 1;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: #fff;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            font-size: 0.95rem;
+            padding: 0.6rem 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
             transition: all 0.2s ease;
-            min-width: 200px;
         }
 
         input:focus {
             border-color: rgba(255, 255, 255, 0.2);
             outline: none;
-            background: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
         }
 
         select {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: #fff;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            font-size: 0.95rem;
+            padding: 0.6rem 2rem 0.6rem 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
             transition: all 0.2s ease;
-            min-width: 150px;
             cursor: pointer;
             appearance: none;
             -webkit-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 1rem center;
-            padding-right: 2.5rem;
+            background-position: right 0.75rem center;
+            min-width: 120px;
         }
 
         select:hover {
-            background-color: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        select:focus {
-            border-color: rgba(255, 255, 255, 0.2);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.05);
         }
 
         button.search-button {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 500;
+            background: none;
+            border: none;
+            padding: 0.6rem;
+            color: rgba(255, 255, 255, 0.6);
             cursor: pointer;
             transition: all 0.2s ease;
-            white-space: nowrap;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         button.search-button:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-1px);
+            color: rgba(255, 255, 255, 0.9);
         }
 
-        button.search-button:active {
-            transform: translateY(0);
+        button.search-button:before {
+            content: "⌕";
+            font-size: 1.2rem;
+            font-weight: 300;
         }
 
         .player-grid {
-            display: flex;
-            flex-wrap: nowrap;
-            gap: 1rem;
-            margin: 0 auto 1.5rem;
-            justify-content: center;
-            max-width: fit-content;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin: 0 auto 2rem;
             padding: 0.5rem;
-        }
-
-        #search-results {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0 auto;
-            max-width: 800px;
-        }
-
-        #search-results .player-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 0.5rem;
-        }
-
-        #selected-players {
-            display: flex;
-            justify-content: center;
-            margin: 1rem auto;
-            max-width: 1000px;
-        }
-
-        #selected-players .player-grid {
-            display: flex;
-            flex-wrap: nowrap;
-            justify-content: center;
-            gap: 0.5rem;
         }
 
         .player-card {
-            flex: 0 0 auto;
-            width: 180px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 10px;
-            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 4px;
+            padding: 0.75rem;
             position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             transition: all 0.2s ease;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
         }
 
         .player-card:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
         .player-card h3 {
-            font-size: 1rem;
-            font-weight: 500;
+            font-size: 0.85rem;
+            font-weight: 400;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .player-card p {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
             margin-bottom: 0.5rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            color: #fff;
         }
 
-        .player-card p {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 0.75rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        #radar-chart {
+            width: 800px;
+            height: 600px;
+            margin: 3rem auto;
+            background: rgba(255, 255, 255, 0.01);
+            border-radius: 8px;
+            position: relative;
+        }
+
+        #radar-chart:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 70%);
+            pointer-events: none;
+        }
+
+        .add-button {
+            background: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 400;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.4rem;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.75rem;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .add-button:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
         }
 
         .remove-button {
             position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            background: rgba(255, 75, 75, 0.1);
-            color: rgba(255, 75, 75, 0.8);
-            border: 1px solid rgba(255, 75, 75, 0.2);
-            width: 24px;
-            height: 24px;
-            border-radius: 6px;
-            font-size: 16px;
+            top: 0.25rem;
+            right: 0.25rem;
+            background: none;
+            color: rgba(255, 75, 75, 0.5);
+            border: none;
+            width: 16px;
+            height: 16px;
+            font-size: 14px;
             line-height: 1;
             cursor: pointer;
             display: flex;
@@ -221,130 +209,48 @@
             justify-content: center;
             padding: 0;
             transition: all 0.2s ease;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
         }
 
         .remove-button:hover {
-            background: rgba(255, 75, 75, 0.15);
-            border-color: rgba(255, 75, 75, 0.3);
+            color: rgba(255, 75, 75, 0.8);
         }
 
-        #radar-chart {
-            width: 800px;
-            height: 600px;
-            margin: 2rem auto;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-
-        .legend {
-            padding: 0.5rem;
-            gap: 1rem;
-            margin-top: 0.5rem;
-        }
-
-        .legend-item {
-            font-size: 0.8rem;
-            gap: 0.3rem;
-        }
-
-        .legend-color {
-            width: 8px;
-            height: 8px;
-        }
-
-        .position-group {
-            margin-bottom: 1rem;
-            font-weight: 500;
-            color: #a0aec0;
-        }
-
-        .add-button {
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
-            font-weight: 500;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 0.5rem;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
+        .section-title {
+            text-align: center;
+            margin: 2rem 0 1rem;
+            color: rgba(255, 255, 255, 0.5);
             font-size: 0.85rem;
-            width: 100%;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .add-button:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-1px);
-        }
-
-        .player-card.selected {
-            background: rgba(255, 255, 255, 0.1);
-            border-width: 2px;
-        }
-
-        .error-message {
-            color: rgba(255, 75, 75, 0.9);
+        .no-results, .no-players {
+            color: rgba(255, 255, 255, 0.4);
             text-align: center;
             padding: 2rem;
-            background: rgba(255, 75, 75, 0.1);
-            border-radius: 8px;
-            margin: 1rem 0;
-            border: 1px solid rgba(255, 75, 75, 0.2);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
         }
 
         @media (max-width: 768px) {
-            .search-container {
-                flex-direction: column;
+            body {
                 padding: 1rem;
             }
+
+            .search-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
             
-            input, select, button.search-button {
+            input, select {
                 width: 100%;
-            }
-            
-            .player-grid {
-                flex-wrap: wrap;
-                gap: 0.75rem;
-            }
-            
-            .player-card {
-                width: calc(50% - 0.75rem);
             }
             
             #radar-chart {
                 width: 100%;
                 height: 400px;
-                padding: 0.5rem;
             }
-        }
-
-        .section-title {
-            text-align: center;
-            margin: 1rem 0;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-
-        .no-results, .no-players {
-            color: rgba(255, 255, 255, 0.5);
-            text-align: center;
-            padding: 2rem;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 8px;
-            margin: 1rem 0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
         }
     </style>
 </head>
@@ -385,34 +291,34 @@
         const selectedPlayers = new Map();
         const colors = {
             red: { 
-                border: '#ff4d4d', 
-                fill: 'rgba(255, 77, 77, 0.08)', 
-                stroke: '#ff4d4d',
-                gradient: ['rgba(255, 77, 77, 0.15)', 'rgba(255, 77, 77, 0.02)']
+                border: '#ff4444', 
+                fill: 'rgba(255, 68, 68, 0.05)', 
+                stroke: '#ff4444',
+                gradient: ['rgba(255, 68, 68, 0.12)', 'rgba(255, 68, 68, 0)']
             },
             blue: { 
-                border: '#00ffff', 
-                fill: 'rgba(0, 255, 255, 0.08)', 
-                stroke: '#00ffff',
-                gradient: ['rgba(0, 255, 255, 0.15)', 'rgba(0, 255, 255, 0.02)']
+                border: '#00e5ff', 
+                fill: 'rgba(0, 229, 255, 0.05)', 
+                stroke: '#00e5ff',
+                gradient: ['rgba(0, 229, 255, 0.12)', 'rgba(0, 229, 255, 0)']
             },
             green: { 
                 border: '#00ff9d', 
-                fill: 'rgba(0, 255, 157, 0.08)', 
+                fill: 'rgba(0, 255, 157, 0.05)', 
                 stroke: '#00ff9d',
-                gradient: ['rgba(0, 255, 157, 0.15)', 'rgba(0, 255, 157, 0.02)']
-            },
-            purple: {
-                border: '#bf00ff',
-                fill: 'rgba(191, 0, 255, 0.08)',
-                stroke: '#bf00ff',
-                gradient: ['rgba(191, 0, 255, 0.15)', 'rgba(191, 0, 255, 0.02)']
+                gradient: ['rgba(0, 255, 157, 0.12)', 'rgba(0, 255, 157, 0)']
             },
             yellow: {
                 border: '#ffcc00',
-                fill: 'rgba(255, 204, 0, 0.08)',
+                fill: 'rgba(255, 204, 0, 0.05)',
                 stroke: '#ffcc00',
-                gradient: ['rgba(255, 204, 0, 0.15)', 'rgba(255, 204, 0, 0.02)']
+                gradient: ['rgba(255, 204, 0, 0.12)', 'rgba(255, 204, 0, 0)']
+            },
+            purple: {
+                border: '#bf00ff',
+                fill: 'rgba(191, 0, 255, 0.05)',
+                stroke: '#bf00ff',
+                gradient: ['rgba(191, 0, 255, 0.12)', 'rgba(191, 0, 255, 0)']
             }
         };
         const colorKeys = ['red', 'blue', 'green', 'purple', 'yellow'];

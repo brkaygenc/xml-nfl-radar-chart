@@ -7,7 +7,7 @@ import os
 from pydantic import BaseModel
 from typing import List, Optional
 import json
-from src.database.queries import (
+from ..database.queries import (
     get_teams,
     get_players_by_position,
     get_players_by_team,
