@@ -432,10 +432,10 @@
             },
             K: {
                 fieldgoals: { label: 'Field Goals', max: 40 },
-                fieldgoalspct: { label: 'FG Percentage', max: 100 },
-                longfieldgoal: { label: 'Longest FG', max: 60 },
-                extrapointspct: { label: 'XP Percentage', max: 100 },
-                totalpoints: { label: 'Total Points', max: 150 }
+                fieldgoalattempts: { label: 'FG Attempts', max: 45 },
+                extrapoints: { label: 'Extra Points', max: 60 },
+                extrapointattempts: { label: 'XP Attempts', max: 65 },
+                totalpoints: { label: 'Total Points', max: 180 }
             }
         };
 
@@ -494,10 +494,12 @@
                 const card = document.createElement('div');
                 card.className = 'player-card';
                 
+                const escapedName = player.playername.replace(/'/g, "\\'");
+                
                 card.innerHTML = `
                     <h3>${player.playername}</h3>
                     <p>${position} - ${player.team || 'Unknown'}</p>
-                    <button class="add-button" onclick="selectPlayer('${player.playerid}', '${player.playername}', '${player.team || 'Unknown'}', '${position}')">
+                    <button class="add-button" onclick="selectPlayer('${player.playerid}', '${escapedName}', '${player.team || 'Unknown'}', '${position}')">
                         Add to Compare
                     </button>
                 `;
