@@ -1,0 +1,1 @@
+web: cd src/soap_service && uvicorn main:app --host=0.0.0.0 --port=$PORT 

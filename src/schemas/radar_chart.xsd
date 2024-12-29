@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://nfl.stats.radar/chart"
+           xmlns:radar="http://nfl.stats.radar/chart"
+           elementFormDefault="qualified">
+
+    <xs:element name="RadarChartData">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="players" type="radar:PlayersType"/>
+                <xs:element name="axes" type="radar:AxesType"/>
+                <xs:element name="values" type="radar:ValuesType"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="PlayersType">
+        <xs:sequence>
+            <xs:element name="player" type="radar:PlayerType" maxOccurs="3"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="PlayerType">
+        <xs:sequence>
+            <xs:element name="id" type="xs:integer"/>
+            <xs:element name="name" type="xs:string"/>
+            <xs:element name="team" type="xs:string"/>
+            <xs:element name="position" type="xs:string"/>
+            <xs:element name="season" type="xs:integer"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="AxesType">
+        <xs:sequence>
+            <xs:element name="axis" type="radar:AxisType" maxOccurs="8"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="AxisType">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string"/>
+            <xs:element name="min" type="xs:decimal"/>
+            <xs:element name="max" type="xs:decimal"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ValuesType">
+        <xs:sequence>
+            <xs:element name="playerValues" type="radar:PlayerValuesType" maxOccurs="3"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="PlayerValuesType">
+        <xs:sequence>
+            <xs:element name="playerId" type="xs:integer"/>
+            <xs:element name="value" type="radar:ValueType" maxOccurs="8"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ValueType">
+        <xs:sequence>
+            <xs:element name="axisName" type="xs:string"/>
+            <xs:element name="value" type="xs:decimal"/>
+            <xs:element name="normalizedValue" type="xs:decimal"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema> 

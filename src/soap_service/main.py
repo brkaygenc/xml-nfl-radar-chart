@@ -1,40 +1,95 @@
-from spyne import Application, rpc, ServiceBase, Unicode, Array
-from spyne.protocol.soap import Soap11
-from spyne.server.wsgi import WsgiApplication
-from wsgiref.simple_server import make_server
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import Response
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import List, Optional
+import json
+from src.database.queries import (
+    get_teams,
+    get_players_by_position,
+    get_players_by_team,
+    get_position_stats,
+    get_team_points
+)
 
-class NFLStatsService(ServiceBase):
-    @rpc(Unicode, _returns=Array(Unicode))
-    def get_player_stats(ctx, player_name):
-        """
-        Get player statistics by name.
-        Returns an array of statistics.
-        """
-        # TODO: Implement database connection and stats retrieval
-        return [f"Stats for {player_name}"]
+app = FastAPI(title="NFL Stats Service")
 
-    @rpc(Array(Unicode), _returns=Array(Unicode))
-    def get_player_comparison(ctx, player_names):
-        """
-        Compare multiple players.
-        Returns comparison data suitable for radar chart.
-        """
-        # TODO: Implement comparison logic
-        return [f"Comparison data for {', '.join(player_names)}"]
+# Enable CORS with specific configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8080"],  # Allow requests from web UI
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*"]
+)
 
-def create_app():
-    application = Application(
-        [NFLStatsService],
-        tns='nfl.stats.soap',
-        in_protocol=Soap11(validator='lxml'),
-        out_protocol=Soap11()
-    )
-    return application
+@app.get("/api/teams")
+async def list_teams():
+    """List all teams"""
+    try:
+        teams = get_teams()
+        return teams
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-if __name__ == '__main__':
-    app = create_app()
-    wsgi_app = WsgiApplication(app)
-    server = make_server('0.0.0.0', 8000, wsgi_app)
-    print("SOAP Service starting on http://0.0.0.0:8000")
-    print("WSDL available at http://0.0.0.0:8000/?wsdl")
-    server.serve_forever() 
+@app.get("/api/players/{position}")
+async def get_players(position: str):
+    """Get players by position (QB, RB, WR, TE, K, DB, DL, LB)"""
+    try:
+        position = position.upper()
+        if position not in ["QB", "RB", "WR", "TE", "K", "DB", "DL", "LB"]:
+            raise HTTPException(status_code=400, detail=f"Invalid position: {position}")
+            
+        players = get_players_by_position(position)
+        # Ensure each player has their position and team set
+        for player in players:
+            player['position'] = position
+            if 'team' not in player or not player['team']:
+                player['team'] = 'Unknown'
+            if 'playername' not in player or not player['playername']:
+                continue  # Skip players without names
+        return [p for p in players if 'playername' in p and p['playername']]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/players/team/{team}")
+async def get_team_players(team: str):
+    """Get all players for a specific team"""
+    try:
+        players = get_players_by_team(team.upper())
+        return players
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/stats/{position}")
+async def get_stats(position: str):
+    """Get detailed statistics for a position"""
+    try:
+        position = position.upper()
+        if position not in ["QB", "RB", "WR", "TE", "DB", "DL", "LB", "K"]:
+            raise HTTPException(status_code=400, detail=f"Invalid position: {position}")
+            
+        stats = get_position_stats(position)
+        # Ensure all stats have numeric values
+        for stat in stats:
+            for key in stat:
+                if key != 'playerid' and key != 'playername' and key != 'team' and key != 'position':
+                    stat[key] = float(stat[key] if stat[key] is not None else 0)
+            stat['position'] = position
+        return stats
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/team/points/{team}")
+async def get_points(team: str):
+    """Get total points for a team"""
+    try:
+        points = get_team_points(team.upper())
+        return {"team": team, "points": points}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000) 

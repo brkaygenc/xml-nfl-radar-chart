@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NFL Player Stats Radar Chart</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #001B3F;
+            color: #ffffff;
+            line-height: 1.4;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 0.5rem;
+            margin: 0 auto 1rem;
+            align-items: center;
+            max-width: 800px;
+            justify-content: center;
+        }
+
+        input {
+            flex-grow: 1;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            border-color: rgba(75, 158, 255, 0.3);
+            outline: none;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        select, button.search-button {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        select:hover, button.search-button:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        select:focus, button.search-button:focus {
+            border-color: rgba(75, 158, 255, 0.3);
+            outline: none;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .player-grid {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 0.5rem;
+            margin: 0 auto 1rem;
+            justify-content: center;
+            max-width: fit-content;
+        }
+
+        #search-results {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 auto;
+            max-width: 800px;
+        }
+
+        #search-results .player-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+        }
+
+        #selected-players {
+            display: flex;
+            justify-content: center;
+            margin: 1rem auto;
+            max-width: 1000px;
+        }
+
+        #selected-players .player-grid {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .player-card {
+            flex: 0 0 auto;
+            width: 150px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 6px;
+            padding: 0.5rem;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .player-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .player-card h3 {
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .player-card p {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .remove-button {
+            position: absolute;
+            top: 0.25rem;
+            right: 0.25rem;
+            background: rgba(255, 75, 75, 0.1);
+            color: #FF4B4B;
+            border: 1px solid rgba(255, 75, 75, 0.2);
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: all 0.2s ease;
+        }
+
+        .remove-button:hover {
+            background: rgba(255, 75, 75, 0.15);
+            border-color: rgba(255, 75, 75, 0.3);
+        }
+
+        #radar-chart {
+            width: 800px;
+            height: 600px;
+            margin: 1rem auto;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+        }
+
+        .legend {
+            padding: 0.5rem;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .legend-item {
+            font-size: 0.8rem;
+            gap: 0.3rem;
+        }
+
+        .legend-color {
+            width: 8px;
+            height: 8px;
+        }
+
+        .position-group {
+            margin-bottom: 1rem;
+            font-weight: 500;
+            color: #a0aec0;
+        }
+
+        .add-button {
+            background: rgba(75, 158, 255, 0.1);
+            color: #4B9EFF;
+            font-weight: 500;
+            border: 1px solid rgba(75, 158, 255, 0.2);
+            padding: 0.4rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.75rem;
+            width: 100%;
+            margin-top: 0.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .add-button:hover {
+            background: rgba(75, 158, 255, 0.15);
+            border-color: rgba(75, 158, 255, 0.3);
+        }
+
+        .player-card.selected {
+            background: rgba(255, 255, 255, 0.1);
+            border-width: 2px;
+        }
+
+        .error-message {
+            color: #ff4444;
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 68, 68, 0.1);
+            border-radius: 8px;
+            margin: 1rem 0;
+            border: 1px solid rgba(255, 68, 68, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .search-container {
+                flex-direction: column;
+            }
+            
+            input, select, button {
+                width: 100%;
+            }
+            
+            .player-list {
+                grid-template-columns: 1fr;
+            }
+            
+            #radar-chart {
+                padding: 1rem;
+                margin: 1rem auto;
+            }
+        }
+
+        .section-title {
+            text-align: center;
+            margin: 1rem 0;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .no-results, .no-players {
+            color: #666;
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>NFL Player Stats Comparison</h1>
+        
+        <div class="search-container">
+            <input type="text" id="player-search" placeholder="Search player name..." onkeyup="if(event.key === 'Enter') searchPlayers()">
+            <select id="position-filter">
+                <option value="">All Positions</option>
+                <optgroup label="Offense">
+                    <option value="QB">QB</option>
+                    <option value="RB">RB</option>
+                    <option value="WR">WR</option>
+                    <option value="TE">TE</option>
+                </optgroup>
+                <optgroup label="Defense">
+                    <option value="DB">DB</option>
+                    <option value="DL">DL</option>
+                    <option value="LB">LB</option>
+                </optgroup>
+                <optgroup label="Special Teams">
+                    <option value="K">K</option>
+                </optgroup>
+            </select>
+            <button onclick="searchPlayers()">Search</button>
+        </div>
+
+        <div id="search-results" class="player-list"></div>
+        <div id="selected-players" class="player-list"></div>
+        <div id="radar-chart"></div>
+        <div id="chart-legend" class="legend"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://nfl-stats-radar-charts.herokuapp.com';
+        const selectedPlayers = new Map();
+        const colors = {
+            red: { 
+                border: '#FF4B4B', 
+                fill: 'rgba(255, 75, 75, 0.08)', 
+                stroke: '#FF4B4B',
+                gradient: ['rgba(255, 75, 75, 0.2)', 'rgba(255, 75, 75, 0.05)']
+            },
+            blue: { 
+                border: '#4B9EFF', 
+                fill: 'rgba(75, 158, 255, 0.08)', 
+                stroke: '#4B9EFF',
+                gradient: ['rgba(75, 158, 255, 0.2)', 'rgba(75, 158, 255, 0.05)']
+            },
+            green: { 
+                border: '#4BFFB6', 
+                fill: 'rgba(75, 255, 182, 0.08)', 
+                stroke: '#4BFFB6',
+                gradient: ['rgba(75, 255, 182, 0.2)', 'rgba(75, 255, 182, 0.05)']
+            },
+            purple: {
+                border: '#9B4BFF',
+                fill: 'rgba(155, 75, 255, 0.08)',
+                stroke: '#9B4BFF',
+                gradient: ['rgba(155, 75, 255, 0.2)', 'rgba(155, 75, 255, 0.05)']
+            },
+            yellow: {
+                border: '#FFD700',
+                fill: 'rgba(255, 215, 0, 0.08)',
+                stroke: '#FFD700',
+                gradient: ['rgba(255, 215, 0, 0.2)', 'rgba(255, 215, 0, 0.05)']
+            }
+        };
+        const colorKeys = ['red', 'blue', 'green', 'purple', 'yellow'];
+
+        // Stats configuration for different positions
+        const statsConfig = {
+            QB: {
+                passingyards: { label: 'Passing Yards', max: 5000 },
+                passingtds: { label: 'Passing TDs', max: 50 },
+                interceptions: { label: 'Interceptions', max: 30, inverse: true },
+                rushingyards: { label: 'Rushing Yards', max: 1000 },
+                rushingtds: { label: 'Rushing TDs', max: 15 },
+                totalpoints: { label: 'Total Points', max: 500 }
+            },
+            RB: {
+                rushingyards: { label: 'Rushing Yards', max: 2000 },
+                rushingtds: { label: 'Rushing TDs', max: 25 },
+                receptions: { label: 'Receptions', max: 100 },
+                receivingyards: { label: 'Receiving Yards', max: 1000 },
+                receivingtds: { label: 'Receiving TDs', max: 10 },
+                totalpoints: { label: 'Total Points', max: 400 }
+            },
+            WR: {
+                receptions: { label: 'Receptions', max: 120 },
+                targets: { label: 'Targets', max: 180 },
+                receivingyards: { label: 'Receiving Yards', max: 2000 },
+                receivingtds: { label: 'Receiving TDs', max: 20 },
+                yardsperreception: { label: 'Yards/Reception', max: 20 },
+                totalpoints: { label: 'Total Points', max: 400 }
+            },
+            TE: {
+                receptions: { label: 'Receptions', max: 100 },
+                targets: { label: 'Targets', max: 150 },
+                receivingyards: { label: 'Receiving Yards', max: 1200 },
+                receivingtds: { label: 'Receiving TDs', max: 15 },
+                yardsperreception: { label: 'Yards/Reception', max: 15 },
+                totalpoints: { label: 'Total Points', max: 300 }
+            },
+            DB: {
+                tackles: { label: 'Tackles', max: 100 },
+                sacks: { label: 'Sacks', max: 10 },
+                interceptions: { label: 'Interceptions', max: 10 },
+                passesdefended: { label: 'Passes Defended', max: 20 },
+                forcefumbles: { label: 'Forced Fumbles', max: 5 },
+                totalpoints: { label: 'Total Points', max: 200 }
+            },
+            DL: {
+                tackles: { label: 'Tackles', max: 80 },
+                sacks: { label: 'Sacks', max: 20 },
+                tackles_tfl: { label: 'Tackles for Loss', max: 25 },
+                qb_hits: { label: 'QB Hits', max: 40 },
+                forcefumbles: { label: 'Forced Fumbles', max: 5 },
+                totalpoints: { label: 'Total Points', max: 200 }
+            },
+            LB: {
+                tackles: { label: 'Tackles', max: 150 },
+                sacks: { label: 'Sacks', max: 15 },
+                interceptions: { label: 'Interceptions', max: 5 },
+                tackles_tfl: { label: 'Tackles for Loss', max: 20 },
+                passesdefended: { label: 'Passes Defended', max: 10 },
+                totalpoints: { label: 'Total Points', max: 200 }
+            },
+            K: {
+                fieldgoals: { label: 'Field Goals', max: 40 },
+                fieldgoalspct: { label: 'FG Percentage', max: 100 },
+                longfieldgoal: { label: 'Longest FG', max: 60 },
+                extrapointspct: { label: 'XP Percentage', max: 100 },
+                totalpoints: { label: 'Total Points', max: 150 }
+            }
+        };
+
+        async function searchPlayers() {
+            const position = document.getElementById('position-filter').value;
+            const name = document.getElementById('player-search').value;
+            
+            if (!position) {
+                alert('Please select a position first');
+                document.getElementById('position-filter').focus();
+                return;
+            }
+
+            if (!name) {
+                alert('Please enter a player name');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/players/${position}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const players = await response.json();
+                const foundPlayers = players.filter(p => 
+                    p.playername.toLowerCase().includes(name.toLowerCase())
+                );
+
+                displaySearchResults(foundPlayers, position);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('search-results').innerHTML = 
+                    '<p class="error-message">Error fetching players. Please try again.</p>';
+            }
+        }
+
+        function displaySearchResults(players, position) {
+            const container = document.getElementById('search-results');
+            container.innerHTML = '';
+            
+            if (players.length === 0) {
+                container.innerHTML = '<p class="no-results">No players found. Try a different name.</p>';
+                return;
+            }
+            
+            const resultsTitle = document.createElement('h2');
+            resultsTitle.className = 'results-title';
+            resultsTitle.textContent = 'Search Results';
+            container.appendChild(resultsTitle);
+            
+            const grid = document.createElement('div');
+            grid.className = 'player-grid';
+            
+            players.forEach(player => {
+                if (!player.playername) return;
+                
+                const card = document.createElement('div');
+                card.className = 'player-card';
+                
+                card.innerHTML = `
+                    <h3>${player.playername}</h3>
+                    <p>${position} - ${player.team || 'Unknown'}</p>
+                    <button class="add-button" onclick="selectPlayer('${player.playerid}', '${player.playername}', '${player.team || 'Unknown'}', '${position}')">
+                        Add to Compare
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+            
+            container.appendChild(grid);
+        }
+
+        function selectPlayer(id, name, team, position) {
+            if (selectedPlayers.size >= 5) {
+                alert('Maximum 5 players can be compared');
+                return;
+            }
+            
+            // Check if we already have players of a different position
+            const existingPosition = selectedPlayers.size > 0 
+                ? [...selectedPlayers.values()][0].position 
+                : position;
+            
+            if (position !== existingPosition) {
+                alert('Can only compare players of the same position');
+                return;
+            }
+            
+            // Assign next available color
+            const colorKey = colorKeys[selectedPlayers.size];
+            const playerObj = {id, name, team, position, colorKey};
+            selectedPlayers.set(id, playerObj);
+            
+            updateSelectedPlayers();
+            updateRadarChart();
+        }
+
+        function removePlayer(id) {
+            selectedPlayers.delete(id);
+            updateSelectedPlayers();
+            updateRadarChart();
+        }
+
+        function updateSelectedPlayers() {
+            const container = document.getElementById('selected-players');
+            container.innerHTML = '';
+            
+            if (selectedPlayers.size === 0) {
+                container.innerHTML = '<p class="no-players">No players selected</p>';
+                return;
+            }
+            
+            const grid = document.createElement('div');
+            grid.className = 'player-grid';
+            
+            [...selectedPlayers.values()].forEach(player => {
+                const color = colors[player.colorKey];
+                const card = document.createElement('div');
+                card.className = 'player-card selected';
+                card.style.borderColor = color.border;
+                
+                card.innerHTML = `
+                    <button class="remove-button" onclick="removePlayer('${player.id}')">&times;</button>
+                    <h3>${player.name}</h3>
+                    <p>${player.position} - ${player.team}</p>
+                `;
+                grid.appendChild(card);
+            });
+            
+            container.appendChild(grid);
+        }
+
+        async function updateRadarChart() {
+            const chartDiv = document.getElementById('radar-chart');
+            const legendDiv = document.getElementById('chart-legend');
+            
+            if (selectedPlayers.size === 0) {
+                chartDiv.innerHTML = '';
+                legendDiv.innerHTML = '';
+                return;
+            }
+            
+            try {
+                const players = [...selectedPlayers.values()];
+                const position = players[0].position;
+                
+                // Make sure we have a valid position
+                if (!position || !statsConfig[position]) {
+                    throw new Error('Invalid position');
+                }
+                
+                const response = await fetch(`${API_URL}/api/stats/${position}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const allStats = await response.json();
+                const selectedPlayerStats = allStats.filter(p => 
+                    players.some(sp => sp.id === p.playerid)
+                );
+                
+                if (selectedPlayerStats.length > 0) {
+                    drawRadarChart(selectedPlayerStats, position);
+                } else {
+                    throw new Error('No stats found for selected players');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                chartDiv.innerHTML = `
+                    <p style="color: #ff4444; text-align: center; padding: 2rem;">
+                        Error loading player stats. Please try again.<br>
+                        <small style="color: #666;">${error.message}</small>
+                    </p>`;
+            }
+        }
+
+        function normalizeValue(value, max, inverse = false) {
+            if (inverse) {
+                return 100 - (Math.min(value, max) / max * 100);
+            }
+            return Math.min(value, max) / max * 100;
+        }
+
+        function drawRadarChart(data, position) {
+            const width = 800;
+            const height = 600;
+            const margin = 80;
+            const radius = Math.min(width, height) / 2 - margin;
+            
+            d3.select('#radar-chart').html('');
+            
+            const svg = d3.select('#radar-chart')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .append('g')
+                .attr('transform', `translate(${width/2},${height/2})`);
+            
+            const config = statsConfig[position];
+            if (!config) {
+                console.error('No configuration found for position:', position);
+                return;
+            }
+            
+            const stats = Object.keys(config);
+            const angleSlice = (Math.PI * 2) / stats.length;
+            
+            // Add glow effect
+            const defs = svg.append('defs');
+            const filter = defs.append('filter')
+                .attr('id', 'glow');
+            
+            filter.append('feGaussianBlur')
+                .attr('stdDeviation', '3.5')
+                .attr('result', 'coloredBlur');
+            
+            const feMerge = filter.append('feMerge');
+            feMerge.append('feMergeNode')
+                .attr('in', 'coloredBlur');
+            feMerge.append('feMergeNode')
+                .attr('in', 'SourceGraphic');
+            
+            // Draw grid circles with dotted lines
+            const gridCircles = [0.2, 0.4, 0.6, 0.8, 1];
+            gridCircles.forEach(d => {
+                svg.append('circle')
+                    .attr('r', radius * d)
+                    .style('fill', 'none')
+                    .style('stroke', 'rgba(255, 255, 255, 0.05)')
+                    .style('stroke-width', '1px')
+                    .style('stroke-dasharray', '2,4');
+                
+                svg.append('text')
+                    .attr('y', -radius * d)
+                    .attr('dy', '0.4em')
+                    .style('text-anchor', 'middle')
+                    .style('fill', 'rgba(255, 255, 255, 0.5)')
+                    .style('font-size', '12px')
+                    .text(`${d * 100}%`);
+            });
+            
+            // Draw axes with glowing effect
+            stats.forEach((stat, i) => {
+                const angle = i * angleSlice;
+                svg.append('line')
+                    .attr('x1', 0)
+                    .attr('y1', 0)
+                    .attr('x2', radius * Math.cos(angle - Math.PI/2))
+                    .attr('y2', radius * Math.sin(angle - Math.PI/2))
+                    .style('stroke', 'rgba(255, 255, 255, 0.1)')
+                    .style('stroke-width', '1px');
+                
+                const labelDistance = radius + 40;
+                svg.append('text')
+                    .attr('x', labelDistance * Math.cos(angle - Math.PI/2))
+                    .attr('y', labelDistance * Math.sin(angle - Math.PI/2))
+                    .style('text-anchor', 'middle')
+                    .style('dominant-baseline', 'middle')
+                    .style('fill', '#fff')
+                    .style('font-size', '14px')
+                    .style('font-weight', '500')
+                    .text(config[stat].label);
+            });
+            
+            // Draw player polygons with gradient and glow
+            data.forEach(player => {
+                const selectedPlayer = [...selectedPlayers.values()].find(p => p.id === player.playerid);
+                if (!selectedPlayer) return;
+                
+                const color = colors[selectedPlayer.colorKey];
+                
+                // Create gradient with very low opacity
+                const gradientId = `gradient-${player.playerid}`;
+                const gradient = defs.append('radialGradient')
+                    .attr('id', gradientId)
+                    .attr('cx', '50%')
+                    .attr('cy', '50%')
+                    .attr('r', '50%');
+                
+                gradient.append('stop')
+                    .attr('offset', '0%')
+                    .attr('stop-color', color.gradient[0])
+                    .attr('stop-opacity', 0.2);
+                
+                gradient.append('stop')
+                    .attr('offset', '100%')
+                    .attr('stop-color', color.gradient[1])
+                    .attr('stop-opacity', 0.05);
+                
+                const points = stats.map((stat, i) => {
+                    const angle = i * angleSlice;
+                    const value = normalizeValue(
+                        parseFloat(player[stat]) || 0,
+                        config[stat].max,
+                        config[stat].inverse
+                    ) / 100;
+                    return [
+                        radius * value * Math.cos(angle - Math.PI/2),
+                        radius * value * Math.sin(angle - Math.PI/2)
+                    ];
+                });
+                
+                // Draw filled polygon with gradient and glow
+                svg.append('polygon')
+                    .attr('points', points.map(p => p.join(',')).join(' '))
+                    .style('fill', `url(#${gradientId})`)
+                    .style('stroke', color.stroke)
+                    .style('stroke-width', '1px')
+                    .style('filter', 'url(#glow)');
+
+                // Add player name near their highest stat point
+                const maxPoint = points.reduce((max, point, idx) => {
+                    const distance = Math.sqrt(point[0] * point[0] + point[1] * point[1]);
+                    return distance > max.distance ? { distance, point, idx } : max;
+                }, { distance: 0, point: null, idx: -1 });
+
+                if (maxPoint.point) {
+                    const angle = maxPoint.idx * angleSlice - Math.PI/2;
+                    const labelDistance = maxPoint.distance + 10;
+                    const labelX = labelDistance * Math.cos(angle);
+                    const labelY = labelDistance * Math.sin(angle);
+
+                    // Add background for better readability
+                    svg.append('rect')
+                        .attr('x', labelX - 2)
+                        .attr('y', labelY - 8)
+                        .attr('width', player.playername.length * 6)
+                        .attr('height', 14)
+                        .attr('fill', 'rgba(0, 27, 63, 0.6)')
+                        .attr('rx', 3);
+
+                    svg.append('text')
+                        .attr('x', labelX)
+                        .attr('y', labelY)
+                        .attr('text-anchor', 'start')
+                        .attr('fill', color.border)
+                        .attr('font-size', '0.8rem')
+                        .attr('font-weight', '400')
+                        .text(player.playername);
+                }
+            });
+
+            // Remove the bottom legend since we now have labels on the chart
+            document.getElementById('chart-legend').innerHTML = '';
+        }
+
+        // Initialize
+        document.getElementById('player-search').focus();
+    </script>
+</body>
+</html> 
