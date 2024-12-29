@@ -709,7 +709,7 @@
                 
                 const color = colors[selectedPlayer.colorKey];
                 
-                // Create gradient with very low opacity
+                // Create gradient with higher opacity
                 const gradientId = `gradient-${player.playerid}`;
                 const gradient = defs.append('radialGradient')
                     .attr('id', gradientId)
@@ -720,12 +720,12 @@
                 gradient.append('stop')
                     .attr('offset', '0%')
                     .attr('stop-color', color.gradient[0])
-                    .attr('stop-opacity', 0.2);
+                    .attr('stop-opacity', 0.4);
                 
                 gradient.append('stop')
                     .attr('offset', '100%')
                     .attr('stop-color', color.gradient[1])
-                    .attr('stop-opacity', 0.05);
+                    .attr('stop-opacity', 0.15);
                 
                 const points = stats.map((stat, i) => {
                     const angle = i * angleSlice;
@@ -745,39 +745,38 @@
                     .attr('points', points.map(p => p.join(',')).join(' '))
                     .style('fill', `url(#${gradientId})`)
                     .style('stroke', color.stroke)
-                    .style('stroke-width', '1px')
+                    .style('stroke-width', '2px')
                     .style('filter', 'url(#glow)');
 
-                // Add player name near their highest stat point
-                const maxPoint = points.reduce((max, point, idx) => {
-                    const distance = Math.sqrt(point[0] * point[0] + point[1] * point[1]);
-                    return distance > max.distance ? { distance, point, idx } : max;
-                }, { distance: 0, point: null, idx: -1 });
+                // Position player names at corners
+                const cornerIndex = [...selectedPlayers.values()].findIndex(p => p.id === player.playerid);
+                const cornerAngle = (cornerIndex * (2 * Math.PI / 5)) - Math.PI/2; // Divide the circle into 5 parts
+                const labelDistance = radius + 60;
+                const labelX = labelDistance * Math.cos(cornerAngle);
+                const labelY = labelDistance * Math.sin(cornerAngle);
 
-                if (maxPoint.point) {
-                    const angle = maxPoint.idx * angleSlice - Math.PI/2;
-                    const labelDistance = maxPoint.distance + 10;
-                    const labelX = labelDistance * Math.cos(angle);
-                    const labelY = labelDistance * Math.sin(angle);
+                // Add background for better readability
+                const padding = 4;
+                const bgWidth = player.playername.length * 7 + padding * 2;
+                const bgHeight = 20;
 
-                    // Add background for better readability
-                    svg.append('rect')
-                        .attr('x', labelX - 2)
-                        .attr('y', labelY - 8)
-                        .attr('width', player.playername.length * 6)
-                        .attr('height', 14)
-                        .attr('fill', 'rgba(0, 27, 63, 0.6)')
-                        .attr('rx', 3);
+                svg.append('rect')
+                    .attr('x', labelX - (bgWidth/2))
+                    .attr('y', labelY - (bgHeight/2))
+                    .attr('width', bgWidth)
+                    .attr('height', bgHeight)
+                    .attr('fill', 'rgba(0, 0, 0, 0.7)')
+                    .attr('rx', 4);
 
-                    svg.append('text')
-                        .attr('x', labelX)
-                        .attr('y', labelY)
-                        .attr('text-anchor', 'start')
-                        .attr('fill', color.border)
-                        .attr('font-size', '0.8rem')
-                        .attr('font-weight', '400')
-                        .text(player.playername);
-                }
+                svg.append('text')
+                    .attr('x', labelX)
+                    .attr('y', labelY)
+                    .attr('text-anchor', 'middle')
+                    .attr('dominant-baseline', 'middle')
+                    .attr('fill', color.border)
+                    .attr('font-size', '0.9rem')
+                    .attr('font-weight', '500')
+                    .text(player.playername);
             });
 
             // Remove the bottom legend since we now have labels on the chart
