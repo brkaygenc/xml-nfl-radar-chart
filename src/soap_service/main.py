@@ -7,7 +7,15 @@ import os
 from pydantic import BaseModel
 from typing import List, Optional
 import json
-from ..database.queries import (
+import sys
+from pathlib import Path
+
+# Add the src directory to the Python path
+src_dir = str(Path(__file__).parent.parent)
+if src_dir not in sys.path:
+    sys.path.append(src_dir)
+
+from database.queries import (
     get_teams,
     get_players_by_position,
     get_players_by_team,

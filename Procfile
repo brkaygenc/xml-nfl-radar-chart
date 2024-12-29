@@ -1,1 +1,1 @@
-web: cd src/soap_service && uvicorn main:app --host=0.0.0.0 --port=$PORT 
+web: cd src && PYTHONPATH=$PYTHONPATH:. uvicorn soap_service.main:app --host=0.0.0.0 --port=$PORT 
