@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://nfl.stats/schemas/player"
+           xmlns:tns="http://nfl.stats/schemas/player"
+           elementFormDefault="qualified">
+
+    <xs:element name="player">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="playerid" type="xs:string"/>
+                <xs:element name="playername" type="xs:string"/>
+                <xs:element name="team" type="xs:string"/>
+                <xs:element name="position" type="xs:string"/>
+                <xs:element name="stats" type="tns:statsType"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="statsType">
+        <xs:sequence>
+            <xs:element name="totalpoints" type="xs:decimal"/>
+            <!-- QB Stats -->
+            <xs:element name="passingyards" type="xs:integer" minOccurs="0"/>
+            <xs:element name="passingtds" type="xs:integer" minOccurs="0"/>
+            <xs:element name="interceptions" type="xs:integer" minOccurs="0"/>
+            <!-- WR/TE Stats -->
+            <xs:element name="receptions" type="xs:integer" minOccurs="0"/>
+            <xs:element name="targets" type="xs:integer" minOccurs="0"/>
+            <xs:element name="receivingyards" type="xs:integer" minOccurs="0"/>
+            <xs:element name="receivingtds" type="xs:integer" minOccurs="0"/>
+            <!-- Defensive Stats -->
+            <xs:element name="tackles" type="xs:integer" minOccurs="0"/>
+            <xs:element name="sacks" type="xs:decimal" minOccurs="0"/>
+            <xs:element name="tackles_tfl" type="xs:integer" minOccurs="0"/>
+            <!-- Kicker Stats -->
+            <xs:element name="fieldgoals" type="xs:integer" minOccurs="0"/>
+            <xs:element name="fieldgoalattempts" type="xs:integer" minOccurs="0"/>
+            <xs:element name="extrapoints" type="xs:integer" minOccurs="0"/>
+            <xs:element name="extrapointattempts" type="xs:integer" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema> 

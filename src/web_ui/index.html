@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>NFL Player Stats Radar Chart</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFL Stats 2024 🏈</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -309,468 +311,65 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>NFL Player Stats Comparison</h1>
-        
-        <div class="search-container">
-            <input type="text" id="player-search" placeholder="Search player name..." onkeyup="if(event.key === 'Enter') searchPlayers()">
-            <select id="position-filter">
-                <option value="">All Positions</option>
-                <optgroup label="Offense">
-                    <option value="QB">QB</option>
-                    <option value="RB">RB</option>
-                    <option value="WR">WR</option>
-                    <option value="TE">TE</option>
-                </optgroup>
-                <optgroup label="Defense">
-                    <option value="DB">DB</option>
-                    <option value="DL">DL</option>
-                    <option value="LB">LB</option>
-                </optgroup>
-                <optgroup label="Special Teams">
-                    <option value="K">K</option>
-                </optgroup>
-            </select>
-            <button onclick="searchPlayers()">Search</button>
-        </div>
-
-        <div id="search-results" class="player-list"></div>
-        <div id="selected-players" class="player-list"></div>
-        <div id="radar-chart"></div>
-        <div id="chart-legend" class="legend"></div>
+    <h1>NFL Stats 2024 🏈</h1>
+    
+    <div class="search-container">
+        <select id="position-select">
+            <option value="">Select Position</option>
+            <option value="QB">Quarterback</option>
+            <option value="RB">Running Back</option>
+            <option value="WR">Wide Receiver</option>
+            <option value="TE">Tight End</option>
+            <option value="K">Kicker</option>
+            <option value="DB">Defensive Back</option>
+            <option value="DL">Defensive Line</option>
+            <option value="LB">Linebacker</option>
+        </select>
+        <input type="text" id="search-input" placeholder="Search players...">
+        <button class="search-button">🔍</button>
     </div>
 
+    <div id="search-results"></div>
+    <div id="selected-players"></div>
+    <div id="radar-chart"></div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="/js/soap_client.js"></script>
     <script>
-        const API_URL = window.location.origin;
-        const selectedPlayers = new Map();
-        const colors = {
-            red: { 
-                border: '#ff4444', 
-                fill: 'rgba(255, 68, 68, 0.05)', 
-                stroke: '#ff4444',
-                gradient: ['rgba(255, 68, 68, 0.12)', 'rgba(255, 68, 68, 0)']
-            },
-            blue: { 
-                border: '#00e5ff', 
-                fill: 'rgba(0, 229, 255, 0.05)', 
-                stroke: '#00e5ff',
-                gradient: ['rgba(0, 229, 255, 0.12)', 'rgba(0, 229, 255, 0)']
-            },
-            green: { 
-                border: '#00ff9d', 
-                fill: 'rgba(0, 255, 157, 0.05)', 
-                stroke: '#00ff9d',
-                gradient: ['rgba(0, 255, 157, 0.12)', 'rgba(0, 255, 157, 0)']
-            },
-            yellow: {
-                border: '#ffcc00',
-                fill: 'rgba(255, 204, 0, 0.05)',
-                stroke: '#ffcc00',
-                gradient: ['rgba(255, 204, 0, 0.12)', 'rgba(255, 204, 0, 0)']
-            },
-            purple: {
-                border: '#bf00ff',
-                fill: 'rgba(191, 0, 255, 0.05)',
-                stroke: '#bf00ff',
-                gradient: ['rgba(191, 0, 255, 0.12)', 'rgba(191, 0, 255, 0)']
-            }
-        };
-        const colorKeys = ['red', 'blue', 'green', 'purple', 'yellow'];
-
-        // Stats configuration for different positions
-        const statsConfig = {
-            QB: {
-                passingyards: { label: 'Passing Yards', max: 5000 },
-                passingtds: { label: 'Passing TDs', max: 50 },
-                interceptions: { label: 'Interceptions', max: 30, inverse: true },
-                rushingyards: { label: 'Rushing Yards', max: 1000 },
-                rushingtds: { label: 'Rushing TDs', max: 15 },
-                totalpoints: { label: 'Total Points', max: 500 }
-            },
-            RB: {
-                rushingyards: { label: 'Rushing Yards', max: 2000 },
-                rushingtds: { label: 'Rushing TDs', max: 25 },
-                receptions: { label: 'Receptions', max: 100 },
-                receivingyards: { label: 'Receiving Yards', max: 1000 },
-                receivingtds: { label: 'Receiving TDs', max: 10 },
-                totalpoints: { label: 'Total Points', max: 400 }
-            },
-            WR: {
-                receptions: { label: 'Receptions', max: 120 },
-                targets: { label: 'Targets', max: 180 },
-                receivingyards: { label: 'Receiving Yards', max: 2000 },
-                receivingtds: { label: 'Receiving TDs', max: 20 },
-                totalpoints: { label: 'Total Points', max: 400 }
-            },
-            TE: {
-                receptions: { label: 'Receptions', max: 100 },
-                targets: { label: 'Targets', max: 150 },
-                receivingyards: { label: 'Receiving Yards', max: 1200 },
-                receivingtds: { label: 'Receiving TDs', max: 15 },
-                totalpoints: { label: 'Total Points', max: 300 }
-            },
-            DB: {
-                tackles: { label: 'Tackles', max: 100 },
-                interceptions: { label: 'Interceptions', max: 10 },
-                passesdefended: { label: 'Passes Defended', max: 20 },
-                tackles_tfl: { label: 'TFL', max: 15 },
-                totalpoints: { label: 'Total Points', max: 250 }
-            },
-            DL: {
-                tackles: { label: 'Tackles', max: 80 },
-                sacks: { label: 'Sacks', max: 20 },
-                tackles_tfl: { label: 'TFL', max: 25 },
-                qb_hits: { label: 'QB Hits', max: 40 },
-                totalpoints: { label: 'Total Points', max: 250 }
-            },
-            LB: {
-                tackles: { label: 'Tackles', max: 150 },
-                sacks: { label: 'Sacks', max: 15 },
-                tackles_tfl: { label: 'TFL', max: 25 },
-                interceptions: { label: 'Interceptions', max: 10 },
-                totalpoints: { label: 'Total Points', max: 250 }
-            },
-            K: {
-                fieldgoals: { label: 'Field Goals', max: 40 },
-                fieldgoalattempts: { label: 'FG Attempts', max: 45 },
-                extrapoints: { label: 'Extra Points', max: 60 },
-                extrapointattempts: { label: 'XP Attempts', max: 65 },
-                totalpoints: { label: 'Total Points', max: 180 }
-            }
-        };
-
-        async function searchPlayers() {
-            const position = document.getElementById('position-filter').value;
-            const name = document.getElementById('player-search').value;
+        const client = new NFLStatsClient(window.location.origin);
+        
+        // Position selection handler
+        document.getElementById('position-select').addEventListener('change', async (e) => {
+            const position = e.target.value;
+            if (!position) return;
             
-            if (!position) {
-                alert('Please select a position first');
-                document.getElementById('position-filter').focus();
-                return;
-            }
+            const fragment = await client.getPlayersByPosition(position);
+            document.getElementById('search-results').innerHTML = '';
+            document.getElementById('search-results').appendChild(fragment);
+        });
 
-            if (!name) {
-                alert('Please enter a player name');
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_URL}/api/players/${position}`);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                
-                const players = await response.json();
-                const foundPlayers = players.filter(p => 
-                    p.playername.toLowerCase().includes(name.toLowerCase())
-                );
-
-                displaySearchResults(foundPlayers, position);
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('search-results').innerHTML = 
-                    '<p class="error-message">Error fetching players. Please try again.</p>';
-            }
-        }
-
-        function displaySearchResults(players, position) {
-            const container = document.getElementById('search-results');
-            container.innerHTML = '';
-            
-            if (players.length === 0) {
-                container.innerHTML = '<p class="no-results">No players found. Try a different name.</p>';
-                return;
-            }
-            
-            const resultsTitle = document.createElement('h2');
-            resultsTitle.className = 'results-title';
-            resultsTitle.textContent = 'Search Results';
-            container.appendChild(resultsTitle);
-            
-            const grid = document.createElement('div');
-            grid.className = 'player-grid';
-            
-            players.forEach(player => {
-                if (!player.playername) return;
-                
-                const card = document.createElement('div');
-                card.className = 'player-card';
-                
-                const escapedName = player.playername.replace(/'/g, "\\'");
-                
-                card.innerHTML = `
-                    <h3>${player.playername}</h3>
-                    <p>${position} - ${player.team || 'Unknown'}</p>
-                    <button class="add-button" onclick="selectPlayer('${player.playerid}', '${escapedName}', '${player.team || 'Unknown'}', '${position}')">
-                        Add to Compare
-                    </button>
-                `;
-                grid.appendChild(card);
+        // Search input handler
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            const searchText = e.target.value.toLowerCase();
+            document.querySelectorAll('.player-card').forEach(card => {
+                const playerName = card.querySelector('h3').textContent.toLowerCase();
+                card.style.display = playerName.includes(searchText) ? 'block' : 'none';
             });
-            
-            container.appendChild(grid);
-        }
+        });
 
-        function selectPlayer(id, name, team, position) {
-            if (selectedPlayers.size >= 5) {
+        // Player selection handler
+        async function selectPlayer(playerId, playerName, team, position) {
+            const selectedPlayers = document.querySelectorAll('.selected-player').length;
+            if (selectedPlayers >= 5) {
                 alert('Maximum 5 players can be compared');
                 return;
             }
-            
-            // Check if we already have players of a different position
-            const existingPosition = selectedPlayers.size > 0 
-                ? [...selectedPlayers.values()][0].position 
-                : position;
-            
-            if (position !== existingPosition) {
-                alert('Can only compare players of the same position');
-                return;
-            }
-            
-            // Assign next available color
-            const colorKey = colorKeys[selectedPlayers.size];
-            const playerObj = {id, name, team, position, colorKey};
-            selectedPlayers.set(id, playerObj);
-            
-            updateSelectedPlayers();
-            updateRadarChart();
+
+            const fragment = await client.getPositionStats(position);
+            document.getElementById('radar-chart').appendChild(fragment);
         }
 
-        function removePlayer(id) {
-            selectedPlayers.delete(id);
-            updateSelectedPlayers();
-            updateRadarChart();
-        }
-
-        function updateSelectedPlayers() {
-            const container = document.getElementById('selected-players');
-            container.innerHTML = '';
-            
-            if (selectedPlayers.size === 0) {
-                container.innerHTML = '<p class="no-players">No players selected</p>';
-                return;
-            }
-            
-            const grid = document.createElement('div');
-            grid.className = 'player-grid';
-            
-            [...selectedPlayers.values()].forEach(player => {
-                const color = colors[player.colorKey];
-                const card = document.createElement('div');
-                card.className = 'player-card selected';
-                card.style.borderColor = color.border;
-                
-                card.innerHTML = `
-                    <button class="remove-button" onclick="removePlayer('${player.id}')">&times;</button>
-                    <h3>${player.name}</h3>
-                    <p>${player.position} - ${player.team}</p>
-                `;
-                grid.appendChild(card);
-            });
-            
-            container.appendChild(grid);
-        }
-
-        async function updateRadarChart() {
-            const chartDiv = document.getElementById('radar-chart');
-            const legendDiv = document.getElementById('chart-legend');
-            
-            if (selectedPlayers.size === 0) {
-                chartDiv.innerHTML = '';
-                legendDiv.innerHTML = '';
-                return;
-            }
-            
-            try {
-                const players = [...selectedPlayers.values()];
-                const position = players[0].position;
-                
-                // Make sure we have a valid position
-                if (!position || !statsConfig[position]) {
-                    throw new Error('Invalid position');
-                }
-                
-                const response = await fetch(`${API_URL}/api/stats/${position}`);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                
-                const allStats = await response.json();
-                const selectedPlayerStats = allStats.filter(p => 
-                    players.some(sp => sp.id === p.playerid)
-                );
-                
-                if (selectedPlayerStats.length > 0) {
-                    drawRadarChart(selectedPlayerStats, position);
-                } else {
-                    throw new Error('No stats found for selected players');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                chartDiv.innerHTML = `
-                    <p style="color: #ff4444; text-align: center; padding: 2rem;">
-                        Error loading player stats. Please try again.<br>
-                        <small style="color: #666;">${error.message}</small>
-                    </p>`;
-            }
-        }
-
-        function normalizeValue(value, max, inverse = false) {
-            if (inverse) {
-                return 100 - (Math.min(value, max) / max * 100);
-            }
-            return Math.min(value, max) / max * 100;
-        }
-
-        function drawRadarChart(data, position) {
-            const width = 800;
-            const height = 600;
-            const margin = 80;
-            const radius = Math.min(width, height) / 2 - margin;
-            
-            d3.select('#radar-chart').html('');
-            
-            const svg = d3.select('#radar-chart')
-                .append('svg')
-                .attr('width', width)
-                .attr('height', height)
-                .append('g')
-                .attr('transform', `translate(${width/2},${height/2})`);
-            
-            const config = statsConfig[position];
-            if (!config) {
-                console.error('No configuration found for position:', position);
-                return;
-            }
-            
-            const stats = Object.keys(config);
-            const angleSlice = (Math.PI * 2) / stats.length;
-            
-            // Add glow effect
-            const defs = svg.append('defs');
-            const filter = defs.append('filter')
-                .attr('id', 'glow');
-            
-            filter.append('feGaussianBlur')
-                .attr('stdDeviation', '3.5')
-                .attr('result', 'coloredBlur');
-            
-            const feMerge = filter.append('feMerge');
-            feMerge.append('feMergeNode')
-                .attr('in', 'coloredBlur');
-            feMerge.append('feMergeNode')
-                .attr('in', 'SourceGraphic');
-            
-            // Draw grid circles with dotted lines
-            const gridCircles = [0.2, 0.4, 0.6, 0.8, 1];
-            gridCircles.forEach(d => {
-                svg.append('circle')
-                    .attr('r', radius * d)
-                    .style('fill', 'none')
-                    .style('stroke', 'rgba(255, 255, 255, 0.05)')
-                    .style('stroke-width', '1px')
-                    .style('stroke-dasharray', '2,4');
-                
-                svg.append('text')
-                    .attr('y', -radius * d)
-                    .attr('dy', '0.4em')
-                    .style('text-anchor', 'middle')
-                    .style('fill', 'rgba(255, 255, 255, 0.5)')
-                    .style('font-size', '12px')
-                    .text(`${d * 100}%`);
-            });
-            
-            // Draw axes with glowing effect
-            stats.forEach((stat, i) => {
-                const angle = i * angleSlice;
-                svg.append('line')
-                    .attr('x1', 0)
-                    .attr('y1', 0)
-                    .attr('x2', radius * Math.cos(angle - Math.PI/2))
-                    .attr('y2', radius * Math.sin(angle - Math.PI/2))
-                    .style('stroke', 'rgba(255, 255, 255, 0.1)')
-                    .style('stroke-width', '1px');
-                
-                const labelDistance = radius + 40;
-                svg.append('text')
-                    .attr('x', labelDistance * Math.cos(angle - Math.PI/2))
-                    .attr('y', labelDistance * Math.sin(angle - Math.PI/2))
-                    .style('text-anchor', 'middle')
-                    .style('dominant-baseline', 'middle')
-                    .style('fill', '#fff')
-                    .style('font-size', '14px')
-                    .style('font-weight', '500')
-                    .text(config[stat].label);
-            });
-            
-            // Draw player polygons with gradient and glow
-            data.forEach(player => {
-                const selectedPlayer = [...selectedPlayers.values()].find(p => p.id === player.playerid);
-                if (!selectedPlayer) return;
-                
-                const color = colors[selectedPlayer.colorKey];
-                
-                // Create gradient with higher opacity
-                const gradientId = `gradient-${player.playerid}`;
-                const gradient = defs.append('radialGradient')
-                    .attr('id', gradientId)
-                    .attr('cx', '50%')
-                    .attr('cy', '50%')
-                    .attr('r', '50%');
-                
-                gradient.append('stop')
-                    .attr('offset', '0%')
-                    .attr('stop-color', color.gradient[0])
-                    .attr('stop-opacity', 0.4);
-                
-                gradient.append('stop')
-                    .attr('offset', '100%')
-                    .attr('stop-color', color.gradient[1])
-                    .attr('stop-opacity', 0.15);
-                
-                const points = stats.map((stat, i) => {
-                    const angle = i * angleSlice;
-                    const value = normalizeValue(
-                        parseFloat(player[stat]) || 0,
-                        config[stat].max,
-                        config[stat].inverse
-                    ) / 100;
-                    return [
-                        radius * value * Math.cos(angle - Math.PI/2),
-                        radius * value * Math.sin(angle - Math.PI/2)
-                    ];
-                });
-                
-                // Draw filled polygon with gradient and glow
-                svg.append('polygon')
-                    .attr('points', points.map(p => p.join(',')).join(' '))
-                    .style('fill', `url(#${gradientId})`)
-                    .style('stroke', color.stroke)
-                    .style('stroke-width', '2px')
-                    .style('filter', 'url(#glow)');
-
-                // Position player names at corners
-                const cornerIndex = [...selectedPlayers.values()].findIndex(p => p.id === player.playerid);
-                const cornerAngle = (cornerIndex * (2 * Math.PI / 5)) - Math.PI/2; // Divide the circle into 5 parts
-                const labelDistance = radius + 60;
-                const labelX = labelDistance * Math.cos(cornerAngle);
-                const labelY = labelDistance * Math.sin(cornerAngle);
-
-                // Add text with enhanced visibility
-                svg.append('text')
-                    .attr('x', labelX)
-                    .attr('y', labelY)
-                    .attr('text-anchor', 'middle')
-                    .attr('dominant-baseline', 'middle')
-                    .attr('fill', color.border)
-                    .attr('font-size', '1rem')
-                    .attr('font-weight', '600')
-                    .attr('text-shadow', '2px 2px 4px rgba(0, 0, 0, 0.5)')
-                    .text(player.playername);
-            });
-
-            // Remove the bottom legend since we now have labels on the chart
-            document.getElementById('chart-legend').innerHTML = '';
-        }
-
-        // Initialize
-        document.getElementById('player-search').focus();
+        // ... existing chart configuration ...
     </script>
 </body>
 </html> 
